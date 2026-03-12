@@ -1,0 +1,59 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.pyc
+*$py.class
+*.so
+*.mo
+
+# Virtual environment
+.env
+.venv/
+env/
+venv/
+ENV/
+bin/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Django Stuff
+*.log
+*.pot
+*.sqlite3
+local_settings.py
+# The 'media' folder is for user-uploaded files, which should not be committed to Git.
+media/
+# The 'static' folder is for collected static files (after 'collectstatic'), which are generated at deployment.
+static/
+# Secret keys and other sensitive settings should be stored in environment variables or a separate, ignored file.
+.secret_key
+.DJANGO_SECRET_KEY
+
+# IDE and OS files
+# Visual Studio Code
+.vscode/
+
+# JetBrains (PyCharm, etc.)
+.idea/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
