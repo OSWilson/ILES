@@ -1,5 +1,5 @@
 Internship Management System
-Overview
+Overview 
 The Internship Management System is a web-based application built with Django that helps manage internship placements, student records, and supervisor evaluations.
 Features
 Student registration
