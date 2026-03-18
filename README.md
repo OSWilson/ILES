@@ -12,7 +12,7 @@ Python
 Django
 HTML
 CSS
-postgressSQL
+postgreSQL
 Installation
 Clone the repository
 git clone  https://github.com/OSWilson/Models.git
