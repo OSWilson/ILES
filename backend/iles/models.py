@@ -30,20 +30,26 @@ class CustomUser(AbstractUser):
 
 
 class InternshipPlacement(models.Model):
-    student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='placements')
-    workplace_supervisor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='supervised_placements')
-    academic_supervisor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='academic_supervised_placements')
-    company_name = models.CharField(max_length=255)
+    student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,related_name='placements', limit_choices_to={'role': 'student'})
+    workplace_supervisor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,null=True, blank=True, related_name='workplace_supervisions',limit_choices_to={'role': 'workplace'})
+    academic_supervisor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,null=True, blank=True, related_name='academic_supervisions',limit_choices_to={'role': 'academic'})
+    company_name = models.CharField(max_length=200)
     start_date = models.DateField()
     end_date = models.DateField()
-    description = models.TextField(blank=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def clean(self):
-        if self.end_date < self.start_date:
-            raise ValidationError('End date cannot be before start date.')
-        if self.start_date < timezone.now().date():
-            raise ValidationError('Start date cannot be in the past.')
+        if self.start_date and self.end_date and self.end_date <= self.start_date:
+            raise ValidationError({'end_date': 'End date must be after start date.'})
+        if self.student_id:
+            overlap = InternshipPlacement.objects.filter(student=self.student_id, is_active=True,start_date__lt=self.end_date, end_date__gt=self.start_date,).exclude(pk=self.pk)
+        if overlap.exists():
+            raise ValidationError('Student already has an overlapping placement.')
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.position_title} at {self.company_name} for {self.student.full_name}"
-
+        return f"{self.student} @ {self.company_name}"
