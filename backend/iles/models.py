@@ -53,3 +53,52 @@ class InternshipPlacement(models.Model):
 
     def __str__(self):
         return f"{self.student} @ {self.company_name}"
+        
+class WeeklyLog(models.Model):       
+    STATUS_CHOICES = (
+        ('draft' , 'Draft'),
+        ('submitted' , 'Submitted'), 
+        ('reviewed' , 'Reviewed'),
+        ('submitted', 'Submitted'),
+        ('approved' , 'Approved'),
+        ('rejected', 'Rejected'),
+        
+    )
+    
+    placement = models.ForeignKey(InternshipPlacement, on_delete= models.CASCADE, related_name= 'weekly_logs')
+    week_number = models.PositiveIntegerField()
+    start_date = models.DateField()
+    end_date = models.DateField()
+    log_content = models.TextField (helping_text = "describe activities you have done this week")
+    
+    status = models.CharField(max_length = 20, choices = STATUS_CHOICES, defaut ='draft')
+    
+    created_at = models.DateTimeField(auto_now_add = True)
+     
+    updated_at = models.DateTimeField(auto_now=True)     
+    submitted_at = models.DateTimeField(null=True, blank=True)
+
+    def clean(self):   # to prevent status being changed when made
+        
+        if self.pk:
+            original = WeeklyLog.objects.get(pk=self.pk)
+            if original.status == 'approved' and self.status == 'approved':
+       
+                if original.log_content != self.log_content or original.week_number != self.week_number:
+                    raise ValidationError("You cannot edit a log that has already been approved.")
+        
+        # if end date is not valid
+        if self.start_date and self.end_date and self.end_date <= self.start_date:
+            raise ValidationError({'end_date': 'End date must be after the start date.'})
+    
+    def save (self, *args, **kwargs):
+    
+        if self.status == 'submitted' and not self.submitted_at:
+            from django.utils import timezone
+            self.submitted_at = timezone.now()
+            
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Week {self.week_number} Log - {self.placement.student.username}"
