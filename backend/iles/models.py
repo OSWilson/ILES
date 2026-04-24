@@ -59,7 +59,6 @@ class WeeklyLog(models.Model):
         ('draft' , 'Draft'),
         ('submitted' , 'Submitted'), 
         ('reviewed' , 'Reviewed'),
-        ('submitted', 'Submitted'),
         ('approved' , 'Approved'),
         ('rejected', 'Rejected'),
         
@@ -69,9 +68,9 @@ class WeeklyLog(models.Model):
     week_number = models.PositiveIntegerField()
     start_date = models.DateField()
     end_date = models.DateField()
-    log_content = models.TextField (helping_text = "describe activities you have done this week")
+    log_content = models.TextField (help_text = "describe activities you have done this week")
     
-    status = models.CharField(max_length = 20, choices = STATUS_CHOICES, defaut ='draft')
+    status = models.CharField(max_length = 20, choices = STATUS_CHOICES, default ='draft')
     
     created_at = models.DateTimeField(auto_now_add = True)
      
