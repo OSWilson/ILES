@@ -21,6 +21,6 @@ class CustomUserAdmin(UserAdmin):
     list_display = ('username', 'email', 'role', 'is_active')
     list_filter = ('role',)
     fieldsets = UserAdmin.fieldsets + (('ILES', {'fields': ('role', 'department', 'staff_number', 'student_number')}),)
-    add_fieldsets = UserAdmin.add_fieldsets + (('ILES', {'fields': ('role', 'department', 'staff_number', 'student_number')})
+    add_fieldsets = UserAdmin.add_fieldsets + (('ILES', {'fields': ('role', 'department', 'staff_number', 'student_number')}))
 
 
