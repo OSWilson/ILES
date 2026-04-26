@@ -19,5 +19,8 @@ from django.urls import path
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('auth/login/', LoginView.as_view())
+    path('auth/login/', LoginView.as_view()),
+    path('auth/refresh/', TokenRefreshView.as_view()),
+    path('auth/register/', RegisterView.as_view()),
+    path('auth/profile/', ProfileView.as_view()
 ]
