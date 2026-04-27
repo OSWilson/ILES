@@ -29,5 +29,10 @@ urlpatterns = [
     # placements
     path('placements/', PlacementListCreateView.as_view()),
     path('placements/<int:pk>/', PlacementDetailView.as_view()),
-    path('placements/mine/', MyPlacementView.as_view())
+    path('placements/mine/', MyPlacementView.as_view()),
+    # logs
+    path('logs/', LogListCreateView.as_view()),
+    path('logs/<int:pk>/', LogDetailView.as_view()),
+    path('logs/<int:pk>/submit/', submit_log),
+    path('logs/<int:pk>/review/', review_log)
 ]
