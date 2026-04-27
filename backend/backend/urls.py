@@ -22,5 +22,12 @@ urlpatterns = [
     path('auth/login/', LoginView.as_view()),
     path('auth/refresh/', TokenRefreshView.as_view()),
     path('auth/register/', RegisterView.as_view()),
-    path('auth/profile/', ProfileView.as_view()
+    path('auth/profile/', ProfileView.as_view(),
+         # users
+    path('users/', UserListView.as_view()),
+
+    # placements
+    path('placements/', PlacementListCreateView.as_view()),
+    path('placements/<int:pk>/', PlacementDetailView.as_view()),
+    path('placements/mine/', MyPlacementView.as_view())
 ]
