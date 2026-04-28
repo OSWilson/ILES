@@ -113,3 +113,45 @@ class EvaluationCriteria(models.Model):
 
     class Meta:
         verbose_name_plural = 'Evaluation Criteria'
+class Evaluation(models.Model):
+    STATUS = (
+        ('not_started', 'Not Started'),
+        ('in_progress', 'In Progress'),
+        ('finalized', 'Finalized'),
+    )
+    placement = models.OneToOneField(
+        InternshipPlacement, on_delete=models.CASCADE, related_name='evaluation'
+    )
+    academic_supervisor = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+        null=True, related_name='evaluations_given'
+    )
+    status = models.CharField(max_length=20, choices=STATUS, default='not_started')
+    general_comments = models.TextField(blank=True)
+    total_score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def compute_total(self):
+        total = Decimal('0.00')
+        for s in self.criteria_scores.all():
+            total += (s.score / 10) * s.criteria.weight
+        self.total_score = total
+        self.save()
+        return total
+
+    def __str__(self):
+        return f"Evaluation: {self.placement}"
+
+
+class CriteriaScore(models.Model):
+    evaluation = models.ForeignKey(Evaluation, on_delete=models.CASCADE, related_name='criteria_scores')
+    criteria = models.ForeignKey(EvaluationCriteria, on_delete=models.PROTECT)
+    score = models.DecimalField(max_digits=4, decimal_places=2,validators=[MinValueValidator(Decimal('0')), MaxValueValidator(Decimal('10'))])
+    comment = models.TextField(blank=True)
+
+    class Meta:
+        unique_together = ('evaluation', 'criteria')
+
+    def __str__(self):
+        return f"{self.criteria.name}: {self.score}/10"
