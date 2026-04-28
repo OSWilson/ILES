@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from iles.views import (LoginView, RegisterView, ProfileView,UserListView,PlacementListCreateView, PlacementDetailView, MyPlacementView,LogListCreateView, LogDetailView, submit_log, review_log)
+from iles.views import (LoginView, RegisterView, ProfileView,UserListView,PlacementListCreateView, PlacementDetailView, MyPlacementView,LogListCreateView, LogDetailView, submit_log, review_log, EvaluationListCreateView,EvaluationDetailView,finalize_evaluation, add_score, CriteriaListView )
 from rest_framework_simplejwt.views import TokenRefreshView
 
 urlpatterns = [

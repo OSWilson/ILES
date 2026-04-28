@@ -1,7 +1,7 @@
 # Register your models here.
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import CustomUser, InternshipPlacement, WeeklyLog, Evaluation Criteria, Evaluation, CriteriaScore
+from .models import CustomUser, InternshipPlacement, WeeklyLog, EvaluationCriteria, Evaluation, CriteriaScore
 
 @admin.register(WeeklyLog)
 class WeeklyLogAdmin(admin.ModelAdmin):
