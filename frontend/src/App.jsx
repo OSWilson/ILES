@@ -1,121 +1,132 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import './App.css';
 
-function App() {
-  const [count, setCount] = useState(0)
+
+function LoginPage({ setToken }) {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [role, setRole] = useState('student'); 
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch('http://127.0.0.1:8000/auth/login/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        if (data.user.role !== role && role !== 'supervisor') {
+           setError(`Account found, but it is not a ${role} account.`);
+           return;
+        }
+
+        localStorage.setItem('access', data.access);
+        localStorage.setItem('userRole', data.user.role);
+        setToken(data.access);
+        navigate('/dashboard'); // Redirect after login
+      } else {
+        setError('Invalid username or password.');
+      }
+    } catch (err) {
+      setError('Connection failed. Is the backend running?');
+    }
+  };
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <div className="login-container">
+      <div className="login-card">
+        <h2>ILES Login</h2>
+        <form onSubmit={handleLogin}>
+          <div className="form-group">
+            <label>I am a:</label>
+            <select value={role} onChange={(e) => setRole(e.target.value)}>
+              <option value="student">Student</option>
+              <option value="workplace">Workplace Supervisor</option>
+              <option value="academic">Academic Supervisor</option>
+            </select>
+          </div>
 
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+          <input 
+            type="text" 
+            placeholder="Username" 
+            value={username} 
+            onChange={(e) => setUsername(e.target.value)} 
+            required 
+          />
+          <input 
+            type="password" 
+            placeholder="Password" 
+            value={password} 
+            onChange={(e) => setPassword(e.target.value)} 
+            required 
+          />
+          
+          <button type="submit" className="login-btn">Login</button>
+        </form>
+        {error && <p className="error-msg">{error}</p>}
+      </div>
+    </div>
+  );
 }
 
-export default App
+
+function Dashboard({ token, setToken }) {
+  const role = localStorage.getItem('userRole');
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.clear();
+    setToken(null);
+    navigate('/login');
+  };
+
+  return (
+    <div className="dashboard">
+      <nav>
+        <h1>{role.toUpperCase()} Portal</h1>
+        <button onClick={handleLogout}>Logout</button>
+      </nav>
+      <div className="content">
+        <h2>Welcome back!</h2>
+        <p>You are logged in as a <strong>{role}</strong>.</p>
+        
+        {role === 'student' ? <p>Check your weekly logs.</p> : <p>Review student placements.</p>}
+      </div>
+    </div>
+  );
+}
+
+
+function App() {
+  const [token, setToken] = useState(localStorage.getItem('access'));
+
+  return (
+    <Router>
+      <Routes>
+        
+        <Route 
+          path="/login" 
+          element={!token ? <LoginPage setToken={setToken} /> : <Navigate to="/dashboard" />} 
+        />
+        
+        {/* Protect the Dashboard Route */}
+        <Route 
+          path="/dashboard" 
+          element={token ? <Dashboard token={token} setToken={setToken} /> : <Navigate to="/login" />} 
+        />
+
+        {/* Redirect any other path to login */}
+        <Route path="*" element={<Navigate to="/login" />} />
+      </Routes>
+    </Router>
+  );
+}
+
+export default App;
