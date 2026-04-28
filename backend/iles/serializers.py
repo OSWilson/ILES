@@ -36,17 +36,15 @@ class RegisterSerializer(serializers.ModelSerializer):
 class WeeklyLogSerializer(serializers.ModelSerializer):
     student_name = serializers.CharField(source='placement.student.full_name', read_only=True)
     company_name = serializers.CharField(source='placement.company_name', read_only=True)
+    can_edit = serializers.ReadOnlyField()
 
     class Meta:
         model = WeeklyLog
-        fields = [
-            'id', 'placement', 'student_name','company_name',
-            'week_number', 'start_date', 'end_date', 'log_content', 
-            'status', 'created_at', 'updated_at','submitted_at'
-        ]
+        fields = '__all__'
         read_only_fields = ['status', 'submitted_at', 'created_at', 'updated_at']
 
 class UserSerializer(serializers.ModelSerializer):
+    full_name = serializers.ReadOnlyField()
      class Meta:
          model = CustomUser
          fields = [ 'id', 'username' , 'email', 'first_name', 'last_name', 'full_name',
@@ -56,19 +54,33 @@ class UserSerializer(serializers.ModelSerializer):
         
 
 class PlacementSerializer(serializers.ModelSerializer):
+    student_detail = UserSerializer(source='student', read_only=True)
+    workplace_supervisor_detail = UserSerializer(source='workplace_supervisor', read_only=True)
+    academic_supervisor_detail = UserSerializer(source='academic_supervisor', read_only=True)
+
     class Meta:
         model = InternshipPlacement
         fields = '__all__'
+        read_only_fields = ['id', 'created_at']
+
 
 class CriteriaSerializer(serializers.ModelSerializer):
     class Meta:
         model = EvaluationCriteria
         fields = '__all__'
 
-class CriteriaScoreSerializer(serializers.Serializer):
-    # Define fields based on needed
-    pass
+class CriteriaScoreSerializer(serializers.ModelSerializer):
+    criteria_name = serializers.CharField(source='criteria.name', read_only=True)
+    criteria_weight = serializers.DecimalField(source='criteria.weight', max_digits=5, decimal_places=2, read_only=True)
+    class Meta:
+        model = CriteriaScore
+        fields = '__all__'
+        read_only_fields = ['id']
 
-class EvaluationSerializer(serializers.Serializer):
-    # Define fields based on needed
-    pass
+class EvaluationSerializer(serializers.ModelSerializer):
+    criteria_scores = CriteriaScoreSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Evaluation
+        fields = '__all__'
+        read_only_fields = ['id', 'total_score', 'created_at', 'updated_at']
