@@ -16,23 +16,18 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from iles.views import (
-    LoginView, RegisterView, ProfileView,
-    UserListView,
-    PlacementListCreateView, PlacementDetailView, MyPlacementView,
-    LogListCreateView, LogDetailView, submit_log, review_log
-)
+from iles.views import (LoginView, RegisterView, ProfileView,UserListView,PlacementListCreateView, PlacementDetailView, MyPlacementView,LogListCreateView, LogDetailView, submit_log, review_log)
 from rest_framework_simplejwt.views import TokenRefreshView
 
 urlpatterns = [
+    #auth
     path('admin/', admin.site.urls),
     path('auth/login/', LoginView.as_view()),
     path('auth/refresh/', TokenRefreshView.as_view()),
     path('auth/register/', RegisterView.as_view()),
     path('auth/profile/', ProfileView.as_view()),
-         # users
+    # users
     path('users/', UserListView.as_view()),
-
     # placements
     path('placements/', PlacementListCreateView.as_view()),
     path('placements/<int:pk>/', PlacementDetailView.as_view()),
@@ -41,5 +36,11 @@ urlpatterns = [
     path('logs/', LogListCreateView.as_view()),
     path('logs/<int:pk>/', LogDetailView.as_view()),
     path('logs/<int:pk>/submit/', submit_log),
-    path('logs/<int:pk>/review/', review_log)
+    path('logs/<int:pk>/review/', review_log),
+    # evaluations
+    path('evaluations/', EvaluationListCreateView.as_view()),
+    path('evaluations/<int:pk>/', EvaluationDetailView.as_view()),
+    path('evaluations/<int:pk>/finalize/', finalize_evaluation),
+    path('evaluations/<int:eval_id>/scores/', add_score),
+    path('criteria/', CriteriaListView.as_view()),
 ]
