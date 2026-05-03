@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from .models import CustomUser, InternshipPlacement, WeeklyLog, EvaluationCriteria 
+from .models import CustomUser, InternshipPlacement, WeeklyLog, EvaluationCriteria, CriteriaScore, Evaluation
 
 class CustomTokenSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
@@ -45,7 +45,7 @@ class WeeklyLogSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     full_name = serializers.ReadOnlyField()
-     class Meta:
+    class Meta:
          model = CustomUser
          fields = [ 'id', 'username' , 'email', 'first_name', 'last_name', 'full_name',
          'role', 'department', 'staff_number', 'student_number'

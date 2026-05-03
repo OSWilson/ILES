@@ -2,7 +2,7 @@ from rest_framework import generics, permissions, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
-from .models import CustomUser, InternshipPlacement, WeeklyLog, EvaluationCriteria
+from .models import CustomUser, InternshipPlacement, WeeklyLog, EvaluationCriteria, Evaluation
 from .serializers import (
     CustomTokenSerializer, RegisterSerializer, UserSerializer,
     PlacementSerializer, WeeklyLogSerializer,
@@ -116,7 +116,9 @@ def review_log(request, pk):
         log.approve(request.user)
     elif action == 'reject':
         if not comment:
-            return Response({'error': 'Comment required for rejection.'}, status=400)log.reject(request.user, comment)
+            return Response({'error': 'Comment required for rejection.'}, status=400)
+            
+        log.reject(request.user, comment)
     else:
         return Response({'error': 'Invalid action.'}, status=400)
     return Response({'status': log.status})

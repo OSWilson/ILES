@@ -1,7 +1,7 @@
 # Register your models here.
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import CustomUser, InternshipPlacement, WeeklyLog, Evaluation Criteria, Evaluation, CriteriaScore
+from .models import CustomUser, InternshipPlacement, WeeklyLog, EvaluationCriteria, Evaluation, CriteriaScore
 
 @admin.register(WeeklyLog)
 class WeeklyLogAdmin(admin.ModelAdmin):
@@ -18,7 +18,7 @@ class CustomUserAdmin(UserAdmin):
     list_display = ('username', 'email', 'role', 'is_active')
     list_filter = ('role',)
     fieldsets = UserAdmin.fieldsets + (('ILES', {'fields': ('role', 'department', 'staff_number', 'student_number')}),)
-    add_fieldsets = UserAdmin.add_fieldsets + (('ILES', {'fields': ('role', 'department', 'staff_number', 'student_number')}))
+    add_fieldsets = UserAdmin.add_fieldsets + (('ILES', {'fields': ('role', 'department', 'staff_number', 'student_number')}),)
 
 @admin.register(InternshipPlacement)
 class PlacementAdmin(admin.ModelAdmin):
