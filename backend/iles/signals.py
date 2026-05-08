@@ -10,22 +10,13 @@ from .models import WeeklyLog, InternshipPlacement, Evaluation
 
 @receiver(post_save, sender=WeeklyLog)
 def notify_log_status_change(sender, instance, created, **kwargs):
-    """
-    Fires every time a WeeklyLog is saved.
-
-    sender   = the model class that triggered the signal (WeeklyLog)
-    instance = the actual WeeklyLog object that was saved
-    created  = True if this is a NEW record, False if it's an UPDATE
-    **kwargs = extra keyword arguments (always include this)
-    """
-
 
     if created:
         return
 
     student_email = instance.student.email
     if not student_email:
-        return  # no email on file — skip silently
+        return 
 
     if instance.status == 'approved':
         send_mail(
@@ -39,7 +30,7 @@ def notify_log_status_change(sender, instance, created, **kwargs):
             ),
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[student_email],
-            fail_silently=True,  # don't crash the app if email fails
+            fail_silently=True,
         )
 
     elif instance.status == 'rejected':
@@ -62,7 +53,7 @@ def notify_log_status_change(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=InternshipPlacement)
 def notify_placement_assigned(sender, instance, created, **kwargs):
-    """Fires when a new placement is created."""
+    
     if not created:
         return  
 
@@ -89,7 +80,7 @@ def notify_placement_assigned(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=Evaluation)
 def notify_evaluation_finalized(sender, instance, created, **kwargs):
-    """Fires when an evaluation is saved."""
+  
     if created:
         return
 
