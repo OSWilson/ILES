@@ -22,6 +22,7 @@ import AdminDashboard from './pages/admin/Dashboard'
 
 const qc = new QueryClient()
 
+
 export default function App() {
   return (
     <QueryClientProvider client={qc}>
@@ -50,6 +51,7 @@ export default function App() {
 
               {/* Academic */}
               <Route element={<ProtectedRoute roles={['academic']} />}>
+                {/* REMOVED /admin FROM HERE */}
                 <Route path="/academic/dashboard" element={<AcademicDashboard />} />
                 <Route path="/academic/evaluations/:id" element={<EvaluationDetail />} />
                 <Route path="/profile" element={<ProfilePage />} />
@@ -57,6 +59,8 @@ export default function App() {
 
               {/* Admin */}
               <Route element={<ProtectedRoute roles={['admin']} />}>
+                {/* Added /admin here so it actually points to the dashboard */}
+                <Route path="/admin" element={<AdminDashboard />} />
                 <Route path="/admin/dashboard" element={<AdminDashboard />} />
                 <Route path="/profile" element={<ProfilePage />} />
               </Route>

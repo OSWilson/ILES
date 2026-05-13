@@ -1,6 +1,8 @@
 import axios from 'axios'
 
-const client = axios.create({ baseURL: 'http://localhost:8000/api' })
+const client = axios.create({ 
+  baseURL: 'http://127.0.0.1:8000/api'  // ← Changed from localhost to 127.0.0.1
+})
 
 client.interceptors.request.use(config => {
   const token = localStorage.getItem('access_token')
@@ -15,7 +17,7 @@ client.interceptors.response.use(
     if (err.response?.status === 401 && !original._retry) {
       original._retry = true
       try {
-        const { data } = await axios.post('http://localhost:8000/api/auth/refresh/', {
+        const { data } = await axios.post('http://127.0.0.1:8000/api/auth/refresh/', {  // ← Also change here
           refresh: localStorage.getItem('refresh_token')
         })
         localStorage.setItem('access_token', data.access)

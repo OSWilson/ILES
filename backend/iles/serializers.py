@@ -57,6 +57,7 @@ class PlacementSerializer(serializers.ModelSerializer):
     student_detail = UserSerializer(source='student', read_only=True)
     workplace_supervisor_detail = UserSerializer(source='workplace_supervisor', read_only=True)
     academic_supervisor_detail = UserSerializer(source='academic_supervisor', read_only=True)
+    is_active = serializers.ReadOnlyField() 
 
     class Meta:
         model = InternshipPlacement

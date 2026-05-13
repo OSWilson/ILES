@@ -3,6 +3,7 @@ import { useState } from 'react'
 import Layout from '../../components/Layout'
 import client from '../../api/client'
 import styles from './Dashboard.module.css'
+
 export default function AdminDashboard() {
   const qc = useQueryClient()
   const [form, setForm] = useState({
@@ -10,10 +11,17 @@ export default function AdminDashboard() {
     workplace_supervisor: '', academic_supervisor: '',
   })
 
-  const { data: placements = [] } = useQuery({ queryKey: ['placements'], queryFn: () => client.get('/placements/').then(r => r.data) })
-  const { data: students = [] } = useQuery({ queryKey: ['students'], queryFn: () => client.get('/users/?role=student').then(r => r.data) })
-  const { data: wpUsers = [] } = useQuery({ queryKey: ['wp-users'], queryFn: () => client.get('/users/?role=workplace').then(r => r.data) })
-  const { data: acUsers = [] } = useQuery({ queryKey: ['ac-users'], queryFn: () => client.get('/users/?role=academic').then(r => r.data) })
+  
+  const { data: placementsRaw = [] } = useQuery({ queryKey: ['placements'], queryFn: () => client.get('/placements/').then(r => r.data) })
+  const { data: studentsRaw = [] } = useQuery({ queryKey: ['students'], queryFn: () => client.get('/users/?role=student').then(r => r.data) })
+  const { data: wpUsersRaw = [] } = useQuery({ queryKey: ['wp-users'], queryFn: () => client.get('/users/?role=workplace').then(r => r.data) })
+  const { data: acUsersRaw = [] } = useQuery({ queryKey: ['ac-users'], queryFn: () => client.get('/users/?role=academic').then(r => r.data) })
+
+  
+  const placements = Array.isArray(placementsRaw) ? placementsRaw : []
+  const students = Array.isArray(studentsRaw) ? studentsRaw : []
+  const wpUsers = Array.isArray(wpUsersRaw) ? wpUsersRaw : []
+  const acUsers = Array.isArray(acUsersRaw) ? acUsersRaw : []
 
   const createMutation = useMutation({
     mutationFn: data => client.post('/placements/', data),
@@ -23,14 +31,18 @@ export default function AdminDashboard() {
     },
   })
 
-  const f = (key, val) => setForm({ ...form, [key]: val })
+  const f = (key, val) => setForm(prev => ({ ...prev, [key]: val }))
 
   return (
     <Layout>
       <h2 className={styles.title}>Admin Dashboard</h2>
 
       <div className={styles.stats}>
-        {[['Placements', placements.length], ['Students', students.length], ['Active', placements.filter(p => p.is_active).length]].map(([label, val]) => (
+        {[
+          ['Total Placements', placements.length],
+          ['Students', students.length],
+          ['Active Now', placements.filter(p => p.is_active).length]
+        ].map(([label, val]) => (
           <div key={label} className={styles.statCard}>
             <p className={styles.statValue}>{val}</p>
             <p className={styles.statLabel}>{label}</p>
@@ -58,8 +70,8 @@ export default function AdminDashboard() {
             {acUsers.map(u => <option key={u.id} value={u.id}>{u.full_name}</option>)}
           </select>
         </div>
-        <button className={styles.btnCreate} onClick={() => createMutation.mutate(form)}>
-          Create Placement
+        <button className={styles.btnCreate} onClick={() => createMutation.mutate(form)} disabled={createMutation.isPending}>
+          {createMutation.isPending ? 'Creating...' : 'Create Placement'}
         </button>
       </div>
 
@@ -74,19 +86,23 @@ export default function AdminDashboard() {
             </tr>
           </thead>
           <tbody>
-            {placements.map(p => (
-              <tr key={p.id}>
-                <td className={styles.td}>{p.student_detail?.full_name || p.student}</td>
-                <td className={styles.td}>{p.company_name}</td>
-                <td className={styles.tdMuted}>{p.start_date}</td>
-                <td className={styles.tdMuted}>{p.end_date}</td>
-                <td className={styles.td}>
-                  <span className={p.is_active ? styles.activeYes : styles.activeNo}>
-                    {p.is_active ? 'Yes' : 'No'}
-                  </span>
-                </td>
-              </tr>
-            ))}
+            {placements.length === 0 ? (
+              <tr><td colSpan="5" className={styles.td} style={{textAlign: 'center'}}>No placements found.</td></tr>
+            ) : (
+              placements.map(p => (
+                <tr key={p.id}>
+                  <td className={styles.td}>{p.student_detail?.full_name || p.student}</td>
+                  <td className={styles.td}>{p.company_name}</td>
+                  <td className={styles.tdMuted}>{p.start_date}</td>
+                  <td className={styles.tdMuted}>{p.end_date}</td>
+                  <td className={styles.td}>
+                    <span className={p.is_active ? styles.activeYes : styles.activeNo}>
+                      {p.is_active ? 'Yes' : 'No'}
+                    </span>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
