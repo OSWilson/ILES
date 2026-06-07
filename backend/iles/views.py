@@ -1,8 +1,11 @@
 from rest_framework import generics, permissions, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
+from django.db.models import Count, Avg, Q
+from rest_framework import permissions
 from rest_framework_simplejwt.views import TokenObtainPairView
-from .models import CustomUser, InternshipPlacement, WeeklyLog, EvaluationCriteria, Evaluation
+from rest_framework.views import APIView
+from .models import CustomUser, InternshipPlacement, WeeklyLog, EvaluationCriteria, Evaluation, CriteriaScore
 from .serializers import (
     CustomTokenSerializer, RegisterSerializer, UserSerializer,
     PlacementSerializer, WeeklyLogSerializer,
@@ -58,7 +61,7 @@ class PlacementDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
 class MyPlacementView(generics.RetrieveAPIView):
-    """Returns the placement for the currently logged-in student."""
+  
     serializer_class = PlacementSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -66,8 +69,7 @@ class MyPlacementView(generics.RetrieveAPIView):
         return InternshipPlacement.objects.filter(student=self.request.user).first()
 
 class LogListCreateView(generics.ListCreateAPIView):
-    """Renamed from WeeklyLogListCreateView to match urls.py"""
-    serializer_class = WeeklyLogSerializer
+   
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
@@ -167,3 +169,77 @@ def finalize_evaluation(request, pk):
     evaluation.status = 'finalized'
     evaluation.compute_total()
     return Response({'status': 'finalized', 'total_score': str(evaluation.total_score)})
+
+
+
+class ChangePasswordView(APIView):
+    
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        old_password = request.data.get('old_password')
+        new_password = request.data.get('new_password')
+        new_password2 = request.data.get('new_password2')
+
+        if not request.user.check_password(old_password):
+            return Response({'old_password': 'Incorrect password.'}, status=400)
+
+        if new_password != new_password2:
+            return Response({'new_password': 'Passwords do not match.'}, status=400)
+
+        request.user.set_password(new_password)
+        request.user.save()
+        return Response({'message': 'Password changed successfully.'})
+    
+
+
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def student_dashboard_stats(request):
+  
+    user = request.user
+
+    stats = WeeklyLog.objects.filter(student=user).aggregate(
+        total=Count('id'),
+        approved=Count('id', filter=Q(status='approved')),
+        submitted=Count('id', filter=Q(status='submitted')),
+        rejected=Count('id', filter=Q(status='rejected')),
+        draft=Count('id', filter=Q(status='draft')),
+    )
+    return Response(stats)
+
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def admin_dashboard_stats(request):
+   
+    stats = {
+        'total_placements': InternshipPlacement.objects.count(),
+        'active_placements': InternshipPlacement.objects.filter(is_active=True).count(),
+        'total_students': CustomUser.objects.filter(role='student').count(),
+        'total_logs': WeeklyLog.objects.count(),
+        'approved_logs': WeeklyLog.objects.filter(status='approved').count(),
+        'pending_logs': WeeklyLog.objects.filter(status='submitted').count(),
+        'finalized_evaluations': Evaluation.objects.filter(status='finalized').count(),
+        'average_score': Evaluation.objects.filter(
+            status='finalized',
+            total_score__isnull=False
+        ).aggregate(avg=Avg('total_score'))['avg'],
+    }
+    return Response(stats)
+
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def supervisor_dashboard_stats(request):
+    
+    stats = WeeklyLog.objects.filter(
+        placement__workplace_supervisor=request.user
+    ).aggregate(
+        total_assigned=Count('id'),
+        pending_review=Count('id', filter=Q(status='submitted')),
+        approved=Count('id', filter=Q(status='approved')),
+        rejected=Count('id', filter=Q(status='rejected')),
+    )
+    return Response(stats)
