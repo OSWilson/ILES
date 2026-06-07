@@ -35,4 +35,5 @@ api_patterns = [
 urlpatterns = [
     path('django-admin/', admin.site.urls),
     path('api/', include(api_patterns)),
+    path('', include('iles.urls')),
 ]
