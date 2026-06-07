@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 from rest_framework_simplejwt.views import TokenRefreshView
 from .views import ChangePasswordView
 from .views import student_dashboard_stats, admin_dashboard_stats, supervisor_dashboard_stats
@@ -42,6 +42,5 @@ urlpatterns = [
 
     path('api/stats/student/', student_dashboard_stats),
     path('api/stats/admin/', admin_dashboard_stats),
-    path('api/stats/supervisor/', supervisor_dashboard_stats),
-    path('', include('iles.urls')),
+    path('api/stats/supervisor/', supervisor_dashboard_stats)
 ]
