@@ -10,7 +10,6 @@ from .serializers import (
 )
 from django.http import JsonResponse
 
-
 class LoginView(TokenObtainPairView):
     serializer_class = CustomTokenSerializer
 
@@ -168,6 +167,7 @@ def finalize_evaluation(request, pk):
     evaluation.status = 'finalized'
     evaluation.compute_total()
     return Response({'status': 'finalized', 'total_score': str(evaluation.total_score)})
+    
 
 class ChangePasswordView(generics.UpdateAPIView):
     serializer_class = ChangePasswordSerializer
