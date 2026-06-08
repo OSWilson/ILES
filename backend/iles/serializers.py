@@ -90,7 +90,7 @@ class ChangePasswordSerializer(serializers.ModelSerializer):
     old_password = serializers.CharField(write_only=True, required=True)
     new_password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
     new_password2 = serializers.CharField(write_only=True, required=True)
-
+    
     class Meta:
         model = CustomUser
         fields = ['old_password', 'new_password', 'new_password2']
