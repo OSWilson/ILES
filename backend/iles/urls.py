@@ -20,15 +20,12 @@ urlpatterns = [
     path('api/auth/profile/', ProfileView.as_view()),
     path('api/auth/change-password/', ChangePasswordView.as_view()),
 
-    
     path('api/users/', UserListView.as_view()),
 
-    
     path('api/placements/', PlacementListCreateView.as_view()),
     path('api/placements/<int:pk>/', PlacementDetailView.as_view()),
     path('api/placements/mine/', MyPlacementView.as_view()),
 
-    
     path('api/logs/', LogListCreateView.as_view()),
     path('api/logs/<int:pk>/', LogDetailView.as_view()),
     path('api/logs/<int:pk>/submit/', submit_log),
