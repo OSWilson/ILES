@@ -57,6 +57,7 @@ class PlacementSerializer(serializers.ModelSerializer):
     student_detail = UserSerializer(source='student', read_only=True)
     workplace_supervisor_detail = UserSerializer(source='workplace_supervisor', read_only=True)
     academic_supervisor_detail = UserSerializer(source='academic_supervisor', read_only=True)
+    is_active = serializers.ReadOnlyField() 
 
     class Meta:
         model = InternshipPlacement
@@ -84,3 +85,17 @@ class EvaluationSerializer(serializers.ModelSerializer):
         model = Evaluation
         fields = '__all__'
         read_only_fields = ['id', 'total_score', 'created_at', 'updated_at']
+
+class ChangePasswordSerializer(serializers.ModelSerializer):
+    old_password = serializers.CharField(write_only=True, required=True)
+    new_password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
+    new_password2 = serializers.CharField(write_only=True, required=True)
+    
+    class Meta:
+        model = CustomUser
+        fields = ['old_password', 'new_password', 'new_password2']
+
+    def validate(self, attrs):
+        if attrs['new_password'] != attrs['new_password2']:
+            raise serializers.ValidationError({'new_password': 'New passwords do not match.'})
+        return attrs

@@ -9,9 +9,9 @@ from .models import CustomUser, InternshipPlacement, WeeklyLog, EvaluationCriter
 from .serializers import (
     CustomTokenSerializer, RegisterSerializer, UserSerializer,
     PlacementSerializer, WeeklyLogSerializer,
-    CriteriaSerializer, CriteriaScoreSerializer, EvaluationSerializer
+    CriteriaSerializer, CriteriaScoreSerializer, EvaluationSerializer, ChangePasswordSerializer
 )
-
+from django.http import JsonResponse
 
 class LoginView(TokenObtainPairView):
     serializer_class = CustomTokenSerializer
@@ -169,6 +169,7 @@ def finalize_evaluation(request, pk):
     evaluation.status = 'finalized'
     evaluation.compute_total()
     return Response({'status': 'finalized', 'total_score': str(evaluation.total_score)})
+<<<<<<< HEAD
 
 
 
@@ -243,3 +244,23 @@ def supervisor_dashboard_stats(request):
         rejected=Count('id', filter=Q(status='rejected')),
     )
     return Response(stats)
+=======
+    
+
+class ChangePasswordView(generics.UpdateAPIView):
+    serializer_class = ChangePasswordSerializer
+    model = CustomUser
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self, queryset=None):
+        return self.request.user
+
+def student_dashboard_stats(request):
+    return JsonResponse({"status": "success", "data": "Student data coming soon"})
+
+def admin_dashboard_stats(request):
+    return JsonResponse({"status": "success", "data": "Admin data coming soon"})
+
+def supervisor_dashboard_stats(request):
+    return JsonResponse({"status": "success", "data": "Supervisor data coming soon"})
+>>>>>>> 802f186b8eb0b5f16b3aa21b7eeb59914cc2f819
