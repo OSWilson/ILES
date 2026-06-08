@@ -65,6 +65,14 @@ class InternshipPlacement(models.Model):
     def __str__(self):
         return f"{self.student} @ {self.company_name}"
         
+    @property
+    def duration_weeks(self):
+    #Calculate how many weeks the placement lasts
+    if self.start_date and self.end_date:
+        delta = self.end_date - self.start_date
+        return delta.days // 7
+    return 0
+        
 class WeeklyLog(models.Model):       
     STATUS_CHOICES = (
         ('draft' , 'Draft'),
@@ -166,3 +174,8 @@ class CriteriaScore(models.Model):
 
     def __str__(self):
         return f"{self.criteria.name}: {self.score}/10"
+        
+        
+        
+
+
