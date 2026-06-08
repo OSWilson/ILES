@@ -29,6 +29,17 @@ class CustomUser(AbstractUser):
         return f"{self.full_name} ({self.role})"
 
 
+    def get_role_display_name(self):
+
+        role_names = {
+        'student': 'Student Intern',
+        'workplace': 'Workplace Supervisor',
+        'academic': 'Academic Supervisor',
+        'admin': 'Internship Administrator',
+        }
+        return role_names.get(self.role, self.role)    
+
+
 class InternshipPlacement(models.Model):
     student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,related_name='placements', limit_choices_to={'role': 'student'})
     workplace_supervisor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,null=True, blank=True, related_name='workplace_supervisions',limit_choices_to={'role': 'workplace'})
