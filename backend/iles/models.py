@@ -41,9 +41,20 @@ class CustomUser(AbstractUser):
 
 
 class InternshipPlacement(models.Model):
-    student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,related_name='placements', limit_choices_to={'role': 'student'})
-    workplace_supervisor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,null=True, blank=True, related_name='workplace_supervisions',limit_choices_to={'role': 'workplace'})
-    academic_supervisor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,null=True, blank=True, related_name='academic_supervisions',limit_choices_to={'role': 'academic'})
+    student = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+        related_name='placements', limit_choices_to={'role': 'student'}
+    )
+    workplace_supervisor = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name='workplace_supervisions',
+        limit_choices_to={'role': 'workplace'}
+    )
+    academic_supervisor = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name='academic_supervisions',
+        limit_choices_to={'role': 'academic'}
+    )
     company_name = models.CharField(max_length=200)
     start_date = models.DateField()
     end_date = models.DateField()
@@ -54,9 +65,12 @@ class InternshipPlacement(models.Model):
         if self.start_date and self.end_date and self.end_date <= self.start_date:
             raise ValidationError({'end_date': 'End date must be after start date.'})
         if self.student_id:
-            overlap = InternshipPlacement.objects.filter(student=self.student_id, is_active=True,start_date__lt=self.end_date, end_date__gt=self.start_date,).exclude(pk=self.pk)
-        if overlap.exists():
-            raise ValidationError('Student already has an overlapping placement.')
+            overlap = InternshipPlacement.objects.filter(
+                student=self.student_id, is_active=True,
+                start_date__lt=self.end_date, end_date__gt=self.start_date,
+            ).exclude(pk=self.pk)
+            if overlap.exists():
+                raise ValidationError('Student already has an overlapping placement.')
 
     def save(self, *args, **kwargs):
         self.full_clean()
@@ -64,69 +78,83 @@ class InternshipPlacement(models.Model):
 
     def __str__(self):
         return f"{self.student} @ {self.company_name}"
-        
-    @property
-    def duration_weeks(self):
-    #Calculate how many weeks the placement lasts
-    if self.start_date and self.end_date:
-        delta = self.end_date - self.start_date
-        return delta.days // 7
-    return 0
-        
-class WeeklyLog(models.Model):       
-    STATUS_CHOICES = (
-        ('draft' , 'Draft'),
-        ('submitted' , 'Submitted'), 
-        ('reviewed' , 'Reviewed'),
-        ('approved' , 'Approved'),
-        ('rejected', 'Rejected'),    
-    )
     
-    placement = models.ForeignKey(InternshipPlacement, on_delete= models.CASCADE, related_name= 'weekly_logs')
-    week_number = models.PositiveIntegerField()
-    start_date = models.DateField()
-    end_date = models.DateField()
-    log_content = models.TextField (help_text = "describe activities you have done this week")
-    
-    status = models.CharField(max_length = 20, choices = STATUS_CHOICES, default ='draft')
-    
-    created_at = models.DateTimeField(auto_now_add = True)
-     
-    updated_at = models.DateTimeField(auto_now=True)     
-    submitted_at = models.DateTimeField(null=True, blank=True)
-    """
-    Represents a student's weekely internship activity report
-    workflow states draft>submitted>approved
-                    draft>rejected>(edit)>submitted
-    Business rules:-Only draft and rejected logs can be edited
-                   -Supervisor comment is required when rejecting
-                   -Week number must be unique per student per placement
-    """
 
-    def clean(self):   # to prevent status being changed when made
-        
-        if self.pk:
-            original = WeeklyLog.objects.get(pk=self.pk)
-            if original.status == 'approved' and self.status == 'approved':
-       
-                if original.log_content != self.log_content or original.week_number != self.week_number:
-                    raise ValidationError("You cannot edit a log that has already been approved.")
-        
-        # if end date is not valid
-        if self.start_date and self.end_date and self.end_date <= self.start_date:
-            raise ValidationError({'end_date': 'End date must be after the start date.'})
-    
-    def save (self, *args, **kwargs):
-    
-        if self.status == 'submitted' and not self.submitted_at:
-            from django.utils import timezone
-            self.submitted_at = timezone.now()
-            
+
+class WeeklyLog(models.Model):
+    STATUS = (
+        ('draft', 'Draft'),
+        ('submitted', 'Submitted'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+    )
+    student = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+        related_name='weekly_logs', limit_choices_to={'role': 'student'}
+    )
+    placement = models.ForeignKey(
+        InternshipPlacement, on_delete=models.CASCADE, related_name='weekly_logs'
+    )
+    reviewed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name='reviewed_logs'
+    )
+    week_number = models.PositiveIntegerField()
+    week_start_date = models.DateField()
+    activities = models.TextField()
+    skills_gained = models.TextField(blank=True)
+    challenges = models.TextField(blank=True)
+    next_week_plan = models.TextField(blank=True)
+    supervisor_comment = models.TextField(blank=True)
+    status = models.CharField(max_length=20, choices=STATUS, default='draft')
+    submitted_at = models.DateTimeField(null=True, blank=True)
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def can_edit(self):
+        return self.status in ('draft', 'rejected')
+
+    def submit(self):
+        if not self.can_edit():
+            raise ValidationError("Only draft or rejected logs can be submitted.")
+        self.status = 'submitted'
+        self.submitted_at = timezone.now()
+        self.save()
+
+    def approve(self, reviewer):
+        self.status = 'approved'
+        self.reviewed_by = reviewer
+        self.reviewed_at = timezone.now()
+        self.save()
+
+    def reject(self, reviewer, comment):
+        self.status = 'rejected'
+        self.reviewed_by = reviewer
+        self.reviewed_at = timezone.now()
+        self.supervisor_comment = comment
+        self.save()
+
+    def clean(self):
+        dup = WeeklyLog.objects.filter(
+            student=self.student_id, placement=self.placement_id,
+            week_number=self.week_number
+        ).exclude(pk=self.pk)
+        if dup.exists():
+            raise ValidationError({'week_number': f'Log for week {self.week_number} already exists.'})
+
+    def save(self, *args, **kwargs):
         self.full_clean()
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"Week {self.week_number} Log - {self.placement.student.username}"
+        return f"Week {self.week_number} — {self.student} [{self.status}]"
+
+    class Meta:
+        ordering = ['-week_start_date']
+        unique_together = ('student', 'placement', 'week_number')    
+        
+
 
 
 class EvaluationCriteria(models.Model):
@@ -139,6 +167,9 @@ class EvaluationCriteria(models.Model):
 
     class Meta:
         verbose_name_plural = 'Evaluation Criteria'
+
+
+
 class Evaluation(models.Model):
     STATUS = (
         ('not_started', 'Not Started'),
@@ -182,7 +213,14 @@ class CriteriaScore(models.Model):
     def __str__(self):
         return f"{self.criteria.name}: {self.score}/10"
         
+    def compute_total(self):
+        total = Decimal('0.00')
+        for s in self.criteria_scores.all():
         
+            total += (s.score / 10) * s.criteria.weight
+        self.total_score = total
+        self.save()
+        return total    
         
 
 
