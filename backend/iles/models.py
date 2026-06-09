@@ -79,8 +79,7 @@ class WeeklyLog(models.Model):
         ('submitted' , 'Submitted'), 
         ('reviewed' , 'Reviewed'),
         ('approved' , 'Approved'),
-        ('rejected', 'Rejected'),
-        
+        ('rejected', 'Rejected'),    
     )
     
     placement = models.ForeignKey(InternshipPlacement, on_delete= models.CASCADE, related_name= 'weekly_logs')
@@ -95,6 +94,14 @@ class WeeklyLog(models.Model):
      
     updated_at = models.DateTimeField(auto_now=True)     
     submitted_at = models.DateTimeField(null=True, blank=True)
+    """
+    Represents a student's weekely internship activity report
+    workflow states draft>submitted>approved
+                    draft>rejected>(edit)>submitted
+    Business rules:-Only draft and rejected logs can be edited
+                   -Supervisor comment is required when rejecting
+                   -Week number must be unique per student per placement
+    """
 
     def clean(self):   # to prevent status being changed when made
         
