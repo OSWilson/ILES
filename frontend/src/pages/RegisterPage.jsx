@@ -48,7 +48,7 @@ export default function RegisterPage() {
 
     setLoading(true)
     try {
-      await client.post('/auth/register/', form)
+      await client.post('/api/auth/register/', form)
       setSuccess('Account created! Redirecting to login...')
       setTimeout(() => navigate('/login'), 2000)
     } catch (err) {
