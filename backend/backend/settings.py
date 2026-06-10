@@ -148,13 +148,11 @@ CORS_ALLOW_CREDENTIALS = True
 import os
 import dj_database_url
 
-if os.environ.get('KOYEB'):
-
+if os.environ.get('RENDER'):
     DEBUG = False
 
-    ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
+    ALLOWED_HOSTS = [os.environ.get('RENDER_EXTERNAL_HOSTNAME')]
 
-  
     DATABASES = {
         'default': dj_database_url.config(
             default=os.environ.get('DATABASE_URL'),
@@ -169,13 +167,6 @@ if os.environ.get('KOYEB'):
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-  
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
-
-
-    CORS_ALLOWED_ORIGINS = os.environ.get(
-        'CORS_ALLOWED_ORIGINS',
-        'http://localhost:5173'
-    ).split(',')
