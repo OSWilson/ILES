@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-+ig+cqjaptc419_4r!3golzg*-dqfbfl5o@@*&&j-6!dboe^4w
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost',  'iles-bggn.onrender.com']
 
 # Application definition
 
@@ -116,9 +116,9 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-STATICFILES_DIRS = [
-    BASE_DIR / 'static',
-]
+#STATICFILES_DIRS = [
+  #  BASE_DIR / 'static',
+#]
 
 AUTH_USER_MODEL = 'iles.CustomUser'
 
