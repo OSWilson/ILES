@@ -1,7 +1,6 @@
-# Root .gitignore for the entire ILES project
-
-# Python
+# Python cache — never commit these
 __pycache__/
+**/__pycache__/
 *.py[cod]
 *.pyo
 *.pyd
@@ -13,17 +12,23 @@ env/
 backend/venv/
 
 # Django
-backend/*.sqlite3
-backend/*.log
+*.sqlite3
+*.log
+media/
+staticfiles/
 backend/media/
 backend/staticfiles/
 
-# Environment variables — NEVER commit these
+# Environment variables — NEVER commit
+.env
+.env.*
+!.env.example
 backend/.env
 backend/.env.*
 !backend/.env.example
 
 # Node / React
+node_modules/
 frontend/node_modules/
 frontend/dist/
 frontend/.env.local
