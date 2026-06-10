@@ -1,0 +1,38 @@
+# Root .gitignore for the entire ILES project
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+env/
+.venv/
+backend/venv/
+
+# Django
+backend/*.sqlite3
+backend/*.log
+backend/media/
+backend/staticfiles/
+
+# Environment variables — NEVER commit these
+backend/.env
+backend/.env.*
+!backend/.env.example
+
+# Node / React
+frontend/node_modules/
+frontend/dist/
+frontend/.env.local
+frontend/.env.production
+
+# OS
+.DS_Store
+Thumbs.db
+
+# VSCode
+.vscode/
+.idea/
