@@ -1,6 +1,11 @@
 
+from pathlib import Path
+import os
 from dotenv import load_dotenv
+
 load_dotenv()
+
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 """
@@ -81,13 +86,6 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-
 
 
 
@@ -154,11 +152,7 @@ CORS_ALLOW_CREDENTIALS = True
 import os
 import dj_database_url
 
-if os.environ.get('RENDER'):
-    DEBUG = False
-
-    ALLOWED_HOSTS = [os.environ.get('RENDER_EXTERNAL_HOSTNAME')]
-
+if os.environ.get('DATABASE_URL'):
     DATABASES = {
         'default': dj_database_url.config(
             default=os.environ.get('DATABASE_URL'),
@@ -166,6 +160,22 @@ if os.environ.get('RENDER'):
             conn_health_checks=True,
         )
     }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+
+if os.environ.get('RENDER'):
+    DEBUG = False
+
+    ALLOWED_HOSTS = [os.environ.get('RENDER_EXTERNAL_HOSTNAME')]
+
+    CSRF_TRUSTED_ORIGINS = [
+        f"https://{os.environ.get('RENDER_EXTERNAL_HOSTNAME')}",
+    ]
 
     if 'whitenoise.middleware.WhiteNoiseMiddleware' not in MIDDLEWARE:
         MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
