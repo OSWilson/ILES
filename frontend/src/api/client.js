@@ -1,8 +1,14 @@
 import axios from 'axios'
 
-const client = axios.create({ 
-  baseURL: 'http://127.0.0.1:8000/api'  // ← Changed from localhost to 127.0.0.1
-})
+// 1. Store the base URL in a variable so you can use it in multiple places
+const baseURL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+
+const client = axios.create({
+  baseURL: baseURL, 
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
 
 client.interceptors.request.use(config => {
   const token = localStorage.getItem('access_token')
@@ -17,7 +23,8 @@ client.interceptors.response.use(
     if (err.response?.status === 401 && !original._retry) {
       original._retry = true
       try {
-        const { data } = await axios.post('http://127.0.0.1:8000/api/auth/refresh/', {  // ← Also change here
+        // 2. Use the baseURL variable here dynamically!
+        const { data } = await axios.post(`${baseURL}/api/auth/refresh/`, {  
           refresh: localStorage.getItem('refresh_token')
         })
         localStorage.setItem('access_token', data.access)
