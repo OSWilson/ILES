@@ -169,7 +169,7 @@ else:
     }
 
 if os.environ.get('RENDER'):
-    DEBUG = False
+    DEBUG = True
 
     ALLOWED_HOSTS = [os.environ.get('RENDER_EXTERNAL_HOSTNAME')]
 
