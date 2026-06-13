@@ -31,8 +31,14 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         validated_data.pop('password2')
-        return CustomUser.objects.create_user(**validated_data)
 
+        if not validated_data.get('staff_number'):
+            validated_data['staff_number'] = None
+        if not validated_data.get('student_number'):
+            validated_data['student_number'] = None
+
+        return CustomUser.objects.create_user(**validated_data)
+    
 class WeeklyLogSerializer(serializers.ModelSerializer):
     student_name = serializers.CharField(source='placement.student.full_name', read_only=True)
     company_name = serializers.CharField(source='placement.company_name', read_only=True)
