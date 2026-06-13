@@ -43,7 +43,7 @@ export default function LoginPage() {
         <form className={styles.form} onSubmit={handleSubmit}>
           {['username', 'password'].map(field => (
             <div key={field} className={styles.field}>
-              <label className={styles.label}>{field.charAt(0).toUpperCase() + field.slice(1)}</label>;
+              <label className={styles.label}>{field.charAt(0).toUpperCase() + field.slice(1)}</label>
               <input
                 className={styles.input}
                 type={field === 'password' ? 'password' : 'text'}

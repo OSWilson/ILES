@@ -9,7 +9,8 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     if (localStorage.getItem('access_token')) {
-      client.get('/api/auth/profile/')
+      
+      client.get('/auth/profile/') 
         .then(r => setUser(r.data))
         .catch(() => localStorage.clear())
         .finally(() => setLoading(false))
@@ -19,7 +20,8 @@ export function AuthProvider({ children }) {
   }, [])
 
   const login = async (username, password) => {
-    const { data } = await client.post('/api/auth/login/', { username, password })
+
+    const { data } = await client.post('/auth/login/', { username, password })
     localStorage.setItem('access_token', data.access)
     localStorage.setItem('refresh_token', data.refresh)
     setUser(data.user)
