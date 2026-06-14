@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-// 1. Store the base URL in a variable so you can use it in multiple places
+
 const baseURL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api';
 
 const client = axios.create({
@@ -23,8 +23,8 @@ client.interceptors.response.use(
     if (err.response?.status === 401 && !original._retry) {
       original._retry = true
       try {
-        // Keeps the refresh URL safe using the sanitized rootURL
-        const { data } = await axios.post(`${rootURL}/api/auth/refresh/`, {  
+        // 2. Use the baseURL variable here dynamically!
+        const { data } = await axios.post(`${baseURL}/api/auth/refresh/`, {  
           refresh: localStorage.getItem('refresh_token')
         })
         localStorage.setItem('access_token', data.access)
