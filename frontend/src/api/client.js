@@ -1,11 +1,7 @@
 import axios from 'axios'
 
-// 1. Get the raw URL from environment or fallback to localhost
-const rawBaseURL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
-
-// 2. BULLETPROOFING: Clean up trailing slashes AND any existing '/api' at the end
-// This ensures rootURL is ALWAYS just the domain (e.g., 'https://iles-bggn.onrender.com')
-const rootURL = rawBaseURL.replace(/\/$/, '').replace(/\/api$/, '');
+// 1. Store the base URL in a variable so you can use it in multiple places
+const baseURL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api';
 
 const client = axios.create({
   baseURL: `${rootURL}/api`,
