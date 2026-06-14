@@ -1,10 +1,11 @@
 import axios from 'axios'
 
-
-const baseURL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api';
+// 1. Get the base API URL
+const baseURL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
 
 const client = axios.create({
-  baseURL: `${rootURL}/api`,
+  // 2. Fixed: Changed rootURL to baseURL here
+  baseURL: `${baseURL}/api`, 
   headers: {
     'Content-Type': 'application/json',
   },
@@ -23,7 +24,7 @@ client.interceptors.response.use(
     if (err.response?.status === 401 && !original._retry) {
       original._retry = true
       try {
-        // 2. Use the baseURL variable here dynamically!
+        // Keeps the token refresh route aligned dynamically
         const { data } = await axios.post(`${baseURL}/api/auth/refresh/`, {  
           refresh: localStorage.getItem('refresh_token')
         })
