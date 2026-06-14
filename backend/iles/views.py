@@ -247,20 +247,3 @@ def supervisor_dashboard_stats(request):
     )
     return Response(stats)
     
-
-class ChangePasswordView(generics.UpdateAPIView):
-    serializer_class = ChangePasswordSerializer
-    model = CustomUser
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get_object(self, queryset=None):
-        return self.request.user
-
-    def student_dashboard_stats(request):
-        return JsonResponse({"status": "success", "data": "Student data coming soon"})
-
-    def admin_dashboard_stats(request):
-        return JsonResponse({"status": "success", "data": "Admin data coming soon"})
-
-    def supervisor_dashboard_stats(request):
-        return JsonResponse({"status": "success", "data": "Supervisor data coming soon"})
